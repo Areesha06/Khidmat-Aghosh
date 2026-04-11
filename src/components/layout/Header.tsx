@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   title: string;
@@ -18,6 +19,10 @@ interface HeaderProps {
 }
 
 const Header = ({ title, subtitle }: HeaderProps) => {
+  const { user } = useAuth();
+
+  const initials = (user?.email?.slice(0, 2) || "AD").toUpperCase();
+
   return (
     <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -74,10 +79,10 @@ const Header = ({ title, subtitle }: HeaderProps) => {
               <Button variant="ghost" className="flex items-center gap-3 pl-2 pr-4">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">AD</AvatarFallback>
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium">Admin User</p>
+                  <p className="text-sm font-medium">{user?.email || "Admin User"}</p>
                   <p className="text-xs text-muted-foreground">Administrator</p>
                 </div>
               </Button>

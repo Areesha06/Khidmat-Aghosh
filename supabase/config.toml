@@ -1,0 +1,7 @@
+project_id = "khidmat-aghosh"
+
+[functions.send-recovery-otp]
+verify_jwt = false
+
+[functions.verify-recovery-otp]
+verify_jwt = false
