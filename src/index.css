@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
@@ -164,6 +164,28 @@
   /* Gradient text */
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60;
+  }
+
+  .admin-bg {
+    background:
+      radial-gradient(1200px 500px at 100% -10%, hsl(var(--accent) / 0.14), transparent 60%),
+      radial-gradient(800px 500px at 0% 10%, hsl(var(--primary) / 0.08), transparent 55%),
+      hsl(var(--background));
+  }
+
+  .admin-grid-pattern {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .admin-section {
+    @apply rounded-2xl border border-border/70 bg-card/90 shadow-[0_8px_30px_rgba(0,0,0,0.05)] backdrop-blur;
+  }
+
+  .admin-pill {
+    @apply inline-flex items-center rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground;
   }
 }
 

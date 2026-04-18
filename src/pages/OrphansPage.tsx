@@ -1,28 +1,53 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
-
-const orphansData = [
-  { id: 1, name: "Aisha Rahman", age: 8, grade: "3rd Grade", story: "Loves painting and dreams of becoming an artist." },
-  { id: 2, name: "Omar Hassan", age: 12, grade: "7th Grade", story: "Passionate about mathematics and coding." },
-  { id: 3, name: "Fatima Ali", age: 6, grade: "1st Grade", story: "Enjoys storytelling and making new friends." },
-  { id: 4, name: "Yusuf Khan", age: 10, grade: "5th Grade", story: "Aspires to be a doctor to help others." },
-  { id: 5, name: "Mariam Patel", age: 14, grade: "9th Grade", story: "A talented writer working on her first book." },
-  { id: 6, name: "Ahmed Syed", age: 9, grade: "4th Grade", story: "Football enthusiast and team captain." },
-  { id: 7, name: "Zara Mohammed", age: 7, grade: "2nd Grade", story: "Loves music and learning piano." },
-  { id: 8, name: "Ibrahim Malik", age: 11, grade: "6th Grade", story: "Science fair winner with big dreams." },
-];
+import { useToast } from "@/hooks/use-toast";
+import { fetchPublicChildren, type PublicChild } from "@/lib/publicData";
 
 const OrphansPage = () => {
+  const { toast } = useToast();
+  const [children, setChildren] = useState<PublicChild[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const filteredOrphans = orphansData.filter(orphan =>
-    orphan.name.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    const loadChildren = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchPublicChildren();
+        setChildren(data);
+      } catch (error) {
+        toast({
+          title: "Could not load children",
+          description: error instanceof Error ? error.message : "Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChildren();
+  }, [toast]);
+
+  const getAge = (dob: string) => {
+    const now = new Date();
+    const birth = new Date(dob);
+    let age = now.getFullYear() - birth.getFullYear();
+    const monthDiff = now.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+      age -= 1;
+    }
+    return Math.max(age, 0);
+  };
+
+  const filteredOrphans = children.filter((child) =>
+    child.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -76,6 +101,16 @@ const OrphansPage = () => {
 
           {/* Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
+            {isLoading && (
+              <div className="md:col-span-2 lg:col-span-3 bg-background p-8 text-sm text-muted-foreground">Loading children...</div>
+            )}
+
+            {!isLoading && filteredOrphans.length === 0 && (
+              <div className="md:col-span-2 lg:col-span-3 bg-background p-8 text-sm text-muted-foreground">
+                No children found yet.
+              </div>
+            )}
+
             {filteredOrphans.map((orphan, index) => (
               <motion.div
                 key={orphan.id}
@@ -85,16 +120,20 @@ const OrphansPage = () => {
                 className="bg-background p-8 group cursor-pointer hover:bg-muted/50 transition-colors"
               >
                 <div className="aspect-square bg-muted mb-6 flex items-center justify-center overflow-hidden">
-                  <span className="text-6xl font-display text-muted-foreground/20 group-hover:scale-110 transition-transform duration-500">
-                    {orphan.name.split(" ").map(n => n[0]).join("")}
-                  </span>
+                  {orphan.profile_image_url ? (
+                    <img src={orphan.profile_image_url} alt={orphan.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-6xl font-display text-muted-foreground/20 group-hover:scale-110 transition-transform duration-500">
+                      {orphan.name.split(" ").map((n) => n[0]).join("")}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-xl font-display mb-2">{orphan.name}</h3>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {orphan.age} years • {orphan.grade}
+                  {getAge(orphan.dob)} years • {orphan.class || "Class not set"}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {orphan.story}
+                  Enrolled under Khidmat Aghosh care program.
                 </p>
               </motion.div>
             ))}

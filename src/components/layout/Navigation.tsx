@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -9,12 +10,25 @@ const navItems = [
   { label: "Support", path: "/donations" },
   { label: "Events", path: "/events" },
   { label: "Gallery", path: "/gallery" },
+  { label: "Admin", path: "/admin-setup" },
 ];
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const location = useLocation();
+  const { user, signOut, isAdmin } = useAuth();
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
@@ -61,25 +75,25 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-10">
+          <nav className="hidden lg:flex items-center gap-3 rounded-full border border-border/40 bg-background/20 px-3 py-2 backdrop-blur-sm">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative text-[13px] tracking-[0.15em] uppercase transition-all duration-300 ${
+                className={`relative rounded-full px-3 py-1.5 text-[12px] tracking-[0.14em] uppercase transition-all duration-300 ${
                   isScrolled 
                     ? "text-foreground" 
                     : "text-white"
                 } ${location.pathname === item.path 
-                    ? "opacity-100" 
-                    : "opacity-60 hover:opacity-100"
+                    ? "opacity-100 bg-background/80 text-foreground" 
+                    : "opacity-70 hover:opacity-100"
                 }`}
               >
                 {item.label}
                 {location.pathname === item.path && (
                   <motion.span
                     layoutId="nav-underline"
-                    className={`absolute -bottom-1 left-0 right-0 h-px ${
+                    className={`absolute -bottom-1 left-2 right-2 h-px ${
                       isScrolled ? "bg-foreground" : "bg-white"
                     }`}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -90,13 +104,35 @@ const Navigation = () => {
           </nav>
 
           {/* CTA */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            {isAdmin && (
+              <button
+                onClick={handleSignOut}
+                className={`text-[12px] tracking-[0.14em] uppercase transition-all duration-500 px-3 py-2 ${
+                  isScrolled ? "text-foreground hover:text-foreground/70" : "text-white hover:text-white/70"
+                }`}
+              >
+                {isSigningOut ? "Signing Out..." : "Logout"}
+              </button>
+            )}
+
+            {!isAdmin && (
+              <Link
+                to="/login"
+                className={`text-[12px] tracking-[0.14em] uppercase transition-all duration-500 px-3 py-2 ${
+                  isScrolled ? "text-foreground hover:text-foreground/70" : "text-white hover:text-white/70"
+                }`}
+              >
+                Login
+              </Link>
+            )}
+
             <Link
               to="/donations"
-              className={`text-[13px] tracking-[0.15em] uppercase transition-all duration-500 px-6 py-3 ${
+              className={`rounded-full text-[12px] tracking-[0.14em] uppercase transition-all duration-500 px-6 py-3 ${
                 isScrolled
                   ? "bg-foreground text-background hover:bg-foreground/90"
-                  : "bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white hover:text-black"
+                  : "text-white hover:text-white/80"
               }`}
             >
               Donate
@@ -158,6 +194,29 @@ const Navigation = () => {
                   </Link>
                 </motion.div>
               ))}
+
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: navItems.length * 0.08 }}
+                className="border-b border-background/10"
+              >
+                {isAdmin ? (
+                  <button
+                    onClick={handleSignOut}
+                    className="block py-5 text-4xl md:text-5xl font-display text-background hover:text-accent transition-colors w-full text-left"
+                  >
+                    {isSigningOut ? "Signing Out..." : "Logout"}
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="block py-5 text-4xl md:text-5xl font-display text-background hover:text-accent transition-colors"
+                  >
+                    Login
+                  </Link>
+                )}
+              </motion.div>
             </nav>
           </motion.div>
         )}
