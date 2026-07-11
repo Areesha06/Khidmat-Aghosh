@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Building2, Handshake, Pencil, Trash2, UserRound, UsersRound, X } from "lucide-react";
+import { Building2, Handshake, Pencil, Trash2, UserRound, UsersRound, X } from "lucide-react";
+import ChildEnrollmentPanel from "@/components/admin/ChildEnrollmentPanel";
+import ChildrenListPanel from "@/components/admin/ChildrenListPanel";
+import EducationListPanel from "@/components/admin/EducationListPanel";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -242,13 +244,11 @@ const AdminSetupPage = () => {
 
       <section className="section-padding">
         <div className="container-narrow space-y-10">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid sm:grid-cols-3 lg:grid-cols-3 gap-4">
             {[
-              { label: "Schools", value: counts.schools, icon: Building2 },
-              { label: "Mothers", value: counts.mothers, icon: UsersRound },
-              { label: "Guardians", value: counts.guardians, icon: UserRound },
-              { label: "Donors", value: counts.donors, icon: Handshake },
               { label: "Children", value: counts.children, icon: UsersRound },
+              { label: "Donors", value: counts.donors, icon: Handshake },
+              { label: "Schools", value: counts.schools, icon: Building2 },
             ].map((item) => (
               <Card key={item.label} className="admin-section border-border/60">
                 <CardHeader className="pb-2">
@@ -270,6 +270,9 @@ const AdminSetupPage = () => {
               <TabsTrigger value="mother">Mother</TabsTrigger>
               <TabsTrigger value="guardian">Guardian</TabsTrigger>
               <TabsTrigger value="donor">Donor</TabsTrigger>
+              <TabsTrigger value="enrollment">Child Enrollment</TabsTrigger>
+              <TabsTrigger value="children">Children</TabsTrigger>
+              <TabsTrigger value="education">Education</TabsTrigger>
             </TabsList>
 
             <TabsContent value="school">
@@ -423,19 +426,19 @@ const AdminSetupPage = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
 
-          <Card className="admin-section bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-2xl font-display">Next Step</CardTitle>
-              <CardDescription>Once core records are ready, use child enrollment to map relationships and sponsorships.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/child-enrollment" className="inline-flex items-center gap-2 text-sm uppercase tracking-widest px-4 py-2 rounded-lg border border-border/70 hover:bg-muted transition-colors">
-                Open Child Enrollment <ArrowRight className="h-4 w-4" />
-              </Link>
-            </CardContent>
-          </Card>
+            <TabsContent value="enrollment">
+              <ChildEnrollmentPanel onDataChange={refreshCounts} />
+            </TabsContent>
+
+            <TabsContent value="children">
+              <ChildrenListPanel refreshKey={counts.children} />
+            </TabsContent>
+
+            <TabsContent value="education">
+              <EducationListPanel refreshKey={counts.children} />
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
